@@ -1,0 +1,102 @@
+@charset "utf-8";
+
+div{
+    margin:0;
+    padding:0;
+}
+#wrap{
+    min-width: 800px;
+    min-height: 450px;
+    width:100%;
+    height:100%;
+    position:absolute;
+    top:0;
+    left:0;
+    overflow:hidden;
+}
+#menu{
+    position:absolute;
+    border:1px solid black;
+    width:65px;
+    height:50px;
+    left:20px;
+    bottom:20px;
+}
+#menu_list{
+    position:absolute;
+    border:1px solid black;
+    width:110px;
+    left:20px;
+    bottom:20px;
+}
+#menu_list>div>span{
+    margin-left:30px;
+}
+#menu_list>div>span.active::before{
+    position:absolute;
+    left:0;
+    content:"▶ ";
+    color:black;
+}
+#menu_list>#key_change_active{
+    position:absolute;
+    border:1px solid black;
+    height:200px;
+    width:160px;
+    left:-1px;
+    top:23px;
+}
+
+#display{
+    width:80%;
+    height:80%;
+    background-color:rgba(160,160,160,0.8);
+    position:absolute;
+    top:10%;
+    left:10%;
+    overflow:hidden;
+}
+#playermove{
+    width:33.75%;
+    height:60%;
+    position:absolute;
+    top:20%;
+    left:33.125%;
+}
+#playermove #player{
+    position:absolute;
+    background-color:red;
+}
+#pm{
+    width:100%;
+    height:100%;
+}
+#pm>div{
+    float:left;
+    width:2%;
+    height:2%;
+}
+
+#map{
+    float: left;
+    position:absolute;
+    opacity: 0.3;
+    width:1600%;
+    height:1200%;
+}
+#map>div{
+    float:left;
+    width:12.5%; /* 800% / 4 = 200% */
+    height:12.5%; /* 600% / 4 = 150% */
+}
+
+#map>div>div{
+    opacity: 0.5;
+    width:100%;
+    height:100%;
+}
+
+#block>div{
+    position:absolute;
+    background-color:blue;
+}

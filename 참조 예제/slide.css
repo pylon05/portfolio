@@ -1,0 +1,48 @@
+#wrap{
+    width:400px;
+    height:400px;
+    background-color: red;
+    margin:0 auto;
+}
+#header,#footer{
+    height:100px;
+    background-color:yellow;
+}
+.slide{
+    height:200px;
+    background-color: green;
+    /* overflow:hidden; */
+}
+.pan{
+    width:400px;
+    height:200px;
+    background-color: black;
+    position:relative;
+    left:0px;
+    top:0px;
+}
+.pan>div{
+    width:400px;
+    height:200px;
+    /* float: left; */
+    color:white;
+    font-size:60px;
+    font-weight:600;
+    text-align: center;
+    line-height:200px;
+    position:absolute;
+    top:0;
+    left:0;
+}
+.pan .num1{
+    background-color: orange;
+    z-index:3;
+}
+.pan .num2{
+    background-color: blue;
+    z-index:2;
+}
+.pan .num3{
+    background-color: purple;
+    z-index:1;
+}

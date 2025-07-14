@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <meta charset="utf-8">
+    </head>
+    <body>
+        <h1></h1>
+        <p></p>
+        <div id="wrap">
+            <h1>이거 안먹음?</h1>
+        </div>
+        <script>
+            let domain=window.location.href;
+            let url=new URL(domain);
+            let params=new URLSearchParams(url.search);
+            let title=params.get("title");
+            let bg=params.get("bg");
+            let fc=params.get("fc");
+            let text=params.get("text");
+            document.getElementsByTagName("h1")[0].innerHTML=title;
+            document.getElementsByTagName("p")[0].innerHTML=text;
+            wrap.setAttribute("style", "background-color:"+bg+"; color:"+fc+";");
+
+            let tr=params.get("tr");
+            let td=params.get("td");
+            let num=0;
+            let t="<h1></h1>";
+            let div=document.getElementById("wrap");
+
+            t+="<table>";
+            for(let i=0;i<tr;i++){
+                t+="<tr>";
+                for(let j=0;j<td;j++){
+                    num++;
+                    t+="<td>"+num+"</td>";
+                }
+                t+="</tr>";
+            }
+            t+="</table>";
+            console.log(t);
+            div.innerHTML=t;
+        </script>
+    </body>
+</html>

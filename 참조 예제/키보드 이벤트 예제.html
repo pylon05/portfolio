@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>키 이벤트</title>
+        <meta charset="utf-8">
+        <style>
+            div{
+                width:50px;
+                height:50px;
+                background-color:red;
+                border-radius:50%;
+                position:relative;
+                left:0px;
+                top:0px;
+            }
+        </style>
+    </head>
+    <body>
+        <div></div>
+        <script>
+            //keydown : 키를 누르고 있는 경우
+            //화살표 왼쪽 : 37
+            //화살표 위쪽 : 38
+            //화살표 오른쪽 : 39
+            //화살표 아래쪽 : 40
+            let leftPoint=0;
+            let topPoint=0;
+            let div=document.getElementsByTagName("div")[0];
+            window.addEventListener("keydown",function(e){
+                if(e.keyCode==37){
+                    leftPoint-=3;
+                    div.setAttribute("style","left:"+leftPoint+"px; top:"+topPoint+"px;");
+                }
+                if(e.keyCode==39){
+                    leftPoint+=3;
+                    div.setAttribute("style","left:"+leftPoint+"px; top:"+topPoint+"px;");                
+                }
+                if(e.keyCode==38){
+                    topPoint-=3;
+                    div.setAttribute("style","left:"+leftPoint+"px; top:"+topPoint+"px;");                
+                }
+                if(e.keyCode==40){
+                    topPoint+=3;
+                    div.setAttribute("style","left:"+leftPoint+"px; top:"+topPoint+"px;");                
+                }
+                console.log(div);
+            });
+            
+        </script>
+    </body>
+</html>

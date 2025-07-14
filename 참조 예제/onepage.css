@@ -1,0 +1,22 @@
+#wrap{
+    width:100%;
+    height:100%;
+    background-color:red;
+    position:absolute;
+    left:0;
+    top:0;
+    overflow:hidden;
+}
+.pan{
+    height:100%;
+    top:0%;
+    position:relative;
+}
+.pan>div{
+    height:100%;
+}
+
+.A{background-color: orange;}
+.B{background-color: yellow;}
+.C{background-color: green;}
+.D{background-color: blue;}
