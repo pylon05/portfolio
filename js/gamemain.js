@@ -323,11 +323,12 @@ window.onload=function(){
         map_left=dpl_left-pl_x; //맨 처음 맵 left는 보이는 x좌표-실제 x좌표 만큼 왼쪽으로 밀어서 설정
         map_top=dpl_top-pl_y;
         // 보여줄 화면 내의 범위 안의 블록 데이터를 가져옴
-        const a=block_data.filter(obj => obj.map_x >= 5 && obj.map_x <= 7 && obj.map_y >= 2 && obj.map_y <= 4); //필터링 하는 좋은 방법 물어보기
+        const a=block_data.filter(obj => obj.map_x >= 5 && obj.map_x <= 7 && obj.map_y >= 2 && obj.map_y <= 4);
         for(let i=0;i<blonum;i++){
             dis_block[i].left+=map_left; //블록 좌표도 같은 값으로 왼쪽으로 밀어서 조정
             dis_block[i].top+=map_top;
         }
+        console.log(a);
     }
     function display(){
         map.setAttribute("style","left:"+map_left+"%; top:"+map_top+"%;");
