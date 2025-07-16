@@ -19,103 +19,20 @@
 
 */
 window.onload=function(){
-
-    /**************** 맵 로드 ****************/
-    let map=document.getElementById("map");
-    let mapx=8;
-    let mapy=8;
-    let curmap="";
-    let map_numx=0;
-    let map_num=0;
-    for(let i=0;i<mapx;i++){
-        let map_numy=0;
-        curmap+="<div>";
-        for(let j=0;j<mapy;j++){
-            curmap+="<div id='"+map_numx+" "+map_numy+"' style='background-color:";
-            map_num=map_numx*mapx+map_numy;
-            if(map_num%6==0){
-                curmap+="#2dc;'>";
-            }
-            if(map_num%6==1){
-                curmap+="#5ab;'>";
-            }
-            if(map_num%6==2){
-                curmap+="#88a;'>";
-            }
-            if(map_num%6==3){
-                curmap+="#a50;'>";
-            }
-            if(map_num%6==4){
-                curmap+="#c29;'>";
-            }
-            if(map_num%6==5){
-                curmap+="#f08;'>";
-            }
-            map_numy++;
-            curmap+="</div>";
-        }
-        map_numx++;
-        curmap+="</div>";
-    }
-    map.innerHTML=curmap; //div 등등 태그가 포함되어 있으면 innerHTML로 추가
-
-    /********************* 장애물 **********************/
     
-    let blo=document.getElementById("block");
-    let curblo="";
-    const dis_block=block_data.map(obj=>({...obj})); //block_data의 값에 영향을 주지 않는 복사본 생성
-    const blonum=dis_block.length; //dis_block의 길이
-    for(let i=0;i<blonum;i++){
-        curblo+="<div id='("+block_data[i].map_x+", "+block_data[i].map_y+") blo"+i+"'></div>";
-    }
-    blo.innerHTML=curblo;
+    /******* 플레이어, 맵, 블록 변수 생성 및 보이기 ********/
 
-    /**************** 플레이어 ****************/
-    let plmove=document.getElementById("pm");
-    let plmovex=50;
-    let curpl="";
-    let pl_numx=0;
-    let pl_num=0;
-    for(let i=0;i<plmovex;i++){
-        let pl_numy=0;
-        for(let j=0;j<plmovex;j++){
-            curpl+="<div id='"+pl_numx+" "+pl_numy+"' style='background-color:";
-                if(pl_num%6==0){
-                    curpl+="#1ee;'>";
-                }
-                if(pl_num%6==1){
-                    curpl+="#4a4a4a;'>";
-                }
-                if(pl_num%6==2){
-                    curpl+="#777;'>";
-                }
-                if(pl_num%6==3){
-                    curpl+="#000;'>";
-                }
-                if(pl_num%6==4){
-                    curpl+="#ccc;'>";
-                }
-                if(pl_num%6==5){
-                    curpl+="#fff;'>";
-                }
-            pl_num++; pl_numy++;
-            curpl+="</div>";
-        }
-        pl_numx++;
-    }
-    plmove.innerHTML=curpl;
-
-    /******* 플레이어, 맵, 블록 변수 생성 및 보여주기 ********/
-
-    let map_left;
-    let map_top;
     const player={map_x: 6, map_y: 3, left: 174, top: 134, width: 12, height: 12}; //플레이어 시작점 데이터
+    const all_block_data=block_data.map(obj=>({...obj})); //block_data의 값에 영향을 주지 않는 복사본 생성
+    let mapx=player.map_x-1;
+    let mapy=player.map_y-1;
+    const dis_block_data=block_data.filter(obj => obj.map_x >= mapx && obj.map_x <= mapx+2 && obj.map_y >= mapy && obj.map_y <= mapy+2); // 화면에서 보여줄 블록 데이터 필터링
     let pl_left;
     let pl_right;
     let pl_top;
     let pl_bottom;
-    let pl_x=player.left+player.map_x*200; //전체 범위에서의 플레이어 left(x)값
-    let pl_y=player.top+player.map_y*150;
+    let pl_x; //플레이어의 x축 위치 좌표
+    let pl_y; //플레이어의 y축 위치 좌표
     let dpl_left=44; // 이동 범위 안에서의 플레이어의 left(x)값
     let dpl_top=44;
     let pl_speed=3;
@@ -125,17 +42,49 @@ window.onload=function(){
     let blo_top=[];
     let blo_bottom=[];
     let bl_x=[];
-    for(let i=0;i<blonum;i++){  //블록의 x축 절대값 좌표
-        bl_x[i]=block_data[i].left+block_data[i].map_x*200;
+    for(let i=0;i<all_block_data.length;i++){  //모든 블록의 x축 절대값 좌표, 보이는 블록과 별개로 충돌 판정에 사용
+        bl_x[i]=all_block_data[i].left+all_block_data[i].map_x*200;
     };
     let bl_y=[];
-    for(let i=0;i<blonum;i++){  //블록의 y축 절대값 좌표
-        bl_y[i]=block_data[i].top+block_data[i].map_y*150;
+    for(let i=0;i<all_block_data.length;i++){  //모든 블록의 y축 절대값 좌표
+        bl_y[i]=all_block_data[i].top+all_block_data[i].map_y*150;
     }
-    let disblo_left=[];
-    let disblo_top=[];
+    const dis_blo_left=[];
+    const dis_blo_top=[];
 
-    first_set(); //처음 실행할 때 맵,블록,플레이어 좌표 설정
+    let map_left=dpl_left-player.left-200; //맨 처음 맵의 left값은 보이는 x좌표-실제 x좌표 만큼 왼쪽으로 밀음
+    let map_top=dpl_top-player.top-150;
+    for(let i=0;i<dis_block_data.length;i++){ //맨 처음 보이는 블록 값도 map과 같은 값으로 왼쪽으로 밀음
+        dis_block_data[i].left+=map_left; 
+        dis_block_data[i].top+=map_top;
+    }
+
+    let map=document.getElementById("map");
+    let curmap="";
+    let map_num;
+    for(let i=mapx;i<=mapx+2;i++){
+        curmap+="<div>";
+        for(let j=mapy;j<=mapy+2;j++){
+            curmap+="<div id='"+i+" "+j+"' style='background-color:";
+            map_num=i*8+j;
+            if(map_num%6==0) curmap+="#2dc;'>";
+            if(map_num%6==1) curmap+="#5ab;'>";
+            if(map_num%6==2) curmap+="#88a;'>";
+            if(map_num%6==3) curmap+="#a50;'>";
+            if(map_num%6==4) curmap+="#c29;'>";
+            if(map_num%6==5) curmap+="#f08;'>";
+            curmap+="</div>";
+        }
+        curmap+="</div>";
+    }
+    map.innerHTML=curmap;
+
+    let blo=document.getElementById("block");
+    let curblo="";
+    for(let i=0;i<dis_block_data.length;i++){ // 화면에서 보여줄 블록 데이터 아이디 설정
+        curblo+="<div id='("+dis_block_data[i].map_x+", "+dis_block_data[i].map_y+") blo"+i+"'></div>";
+    }
+    blo.innerHTML=curblo;
 
     /**************** 메뉴 관련 ****************/
     let menu=document.getElementById("menu");
@@ -183,17 +132,16 @@ window.onload=function(){
     }
     //키를 누를 때 돌아가는 keydown 이벤트
     window.addEventListener("keydown", function(e) {
-        if (e.key == "ArrowUp"){
+        if (menu.id=="menu_list" && e.key == "ArrowUp"){
             menu_point--;
             if(menu_point<1) menu_point=3;
             menu_list();
         }
-        if (e.key == "ArrowDown"){
+        if (menu.id=="menu_list" && e.key == "ArrowDown"){
             menu_point++;
             if(menu_point>3) menu_point=1;
             menu_list();
         }
-        console.log(menu);
     });
 
     /**************** 키 입력 관련 ****************/
@@ -317,41 +265,33 @@ window.onload=function(){
             }  
         }
         
-        
-    }
-    function first_set(){
-        map_left=dpl_left-pl_x; //맨 처음 맵 left는 보이는 x좌표-실제 x좌표 만큼 왼쪽으로 밀어서 설정
-        map_top=dpl_top-pl_y;
-        // 보여줄 화면 내의 범위 안의 블록 데이터를 가져옴
-        const a=block_data.filter(obj => obj.map_x >= 5 && obj.map_x <= 7 && obj.map_y >= 2 && obj.map_y <= 4);
-        for(let i=0;i<blonum;i++){
-            dis_block[i].left+=map_left; //블록 좌표도 같은 값으로 왼쪽으로 밀어서 조정
-            dis_block[i].top+=map_top;
-        }
-        console.log(a);
     }
     function display(){
         map.setAttribute("style","left:"+map_left+"%; top:"+map_top+"%;");
         let p=document.getElementById("player");
-        for(let i=0;i<blonum;i++){
-            let b=document.getElementById("("+block_data[i].map_x+", "+block_data[i].map_y+") blo"+i);
-            disblo_left[i]=dis_block[i].left+dis_block[i].map_x*200;
-            disblo_top[i]=dis_block[i].top+dis_block[i].map_y*150;
-            b.setAttribute("style","left:"+disblo_left[i]+"%; top:"+disblo_top[i]+"%; width:"+dis_block[i].width+"%; height:"+dis_block[i].height+"%;");
+        for(let i=0;i<dis_block_data.length;i++){ // 보여줄 블록들의 id를 불러오고 style 설정
+            let b=document.getElementById("("+dis_block_data[i].map_x+", "+dis_block_data[i].map_y+") blo"+i);
+            dis_blo_left[i]=dis_block_data[i].left+(dis_block_data[i].map_x-5)*200; //블록 좌표값을 화면에 보여줄 좌표값으로 설정
+            dis_blo_top[i]=dis_block_data[i].top+(dis_block_data[i].map_y-2)*150;
+            b.setAttribute("style","left:"+dis_blo_left[i]+"%; top:"+dis_blo_top[i]+"%; width:"+dis_block_data[i].width+"%; height:"+dis_block_data[i].height+"%;");
         }
-        p.setAttribute("style","left:"+dpl_left+"%; top:"+dpl_top+"%; width:"+player.width+"%; height:"+player.height+"%;");
+        p.setAttribute("style","left:"+dpl_left+"%; top:"+dpl_top+"%; width:"+player.width+"%; height:"+player.height+"%;");     
+        
+        if(player.top<0) console.log("맵 위쪽 로딩");
     }
 
     function player_block_check(){ // 플레이어와 블록의 위치값을 체크해서 이동/충돌 판정을 확인할 때 사용
+        pl_x=player.left+player.map_x*200;
+        pl_y=player.top+player.map_y*150;
         pl_left=pl_x;
         pl_right=pl_left+player.width;
         pl_top=pl_y;
         pl_bottom=pl_top+player.height;
-        for(let i=0;i<blonum;i++){
+        for(let i=0;i<all_block_data.length;i++){
             blo_left[i]=bl_x[i];
-            blo_right[i]=blo_left[i]+block_data[i].width;
+            blo_right[i]=blo_left[i]+all_block_data[i].width;
             blo_top[i]=bl_y[i];
-            blo_bottom[i]=blo_top[i]+block_data[i].height;
+            blo_bottom[i]=blo_top[i]+all_block_data[i].height;
         }
     }
     
@@ -361,40 +301,48 @@ window.onload=function(){
         player_block_check();
         if(dpl_left>0&&dpl_left<pl_move) pl_move=dpl_left; // 현재 스피드보다 플레이어 왼쪽 이동범위와 플레이어 왼쪽 간격이 더 좁을 경우
         // 그 속도로 움직이면 플레이어가 이동범위를 뚫은 것 같이 보이기에 그 간격만큼만 이동
-        for(let i=0;i<blonum;i++){
+        for(let i=0;i<all_block_data.length;i++){
             if(pl_left<blo_right[i]+pl_move&&pl_right>blo_left[i]&&pl_top<blo_bottom[i]&&pl_bottom>blo_top[i]){
                 pl_move=pl_left-blo_right[i];
             }
         } // 현재 스피드보다 블록의 오른쪽과 플레이어 왼쪽의 간격이 좁을 경우 그 속도로 움직이면 블록을 뚫고 들어가기에 그 간격만큼만 이동, 위 조건보다 우선순위
-        pl_x-=pl_move;
+        player.left-=pl_move;
         if(dpl_left<=0) {map_left+=pl_move; blockrightmove();}
         if(dpl_left>0) dpl_left-=pl_move; // 플레이어가 맵을 벗어나지 않도록
+        if(player.left<0) {
+            player.left+=200;
+            player.map_x-=1;
+        }
     }
     function player_rightmove(){
         pl_move=pl_speed;
         if(key["ShiftLeft"]) pl_move*=2;
         player_block_check();
         if(dpl_left<88&&dpl_left>88-pl_move) pl_move=88-dpl_left;
-        for(let i=0;i<blonum;i++){
+        for(let i=0;i<all_block_data.length;i++){
             if(pl_left<blo_right[i]&&pl_right>blo_left[i]-pl_move&&pl_top<blo_bottom[i]&&pl_bottom>blo_top[i]){
                 pl_move=blo_left[i]-pl_right;
             }
         }
-        pl_x+=pl_move;
+        player.left+=pl_move;
         if(dpl_left>=88) {map_left-=pl_move; blockleftmove();}
         if(dpl_left<88) dpl_left+=pl_move;
+        if(player.left>200) {
+            player.left-=200;
+            player.map_x+=1;
+        }
     }
     function player_upmove(){
         pl_move=pl_speed;
         if(key["ShiftLeft"]) pl_move*=2;
         player_block_check();
         if(dpl_top>0&&dpl_top<pl_move) pl_move=dpl_top;
-        for(let i=0;i<blonum;i++){
+        for(let i=0;i<all_block_data.length;i++){
             if(pl_left<blo_right[i]&&pl_right>blo_left[i]&&pl_top<blo_bottom[i]+pl_move&&pl_bottom>blo_top[i]){
                 pl_move=pl_top-blo_bottom[i];
             }
         }
-        pl_y-=pl_move;
+        player.top-=pl_move;
         if(dpl_top<=0) {map_top+=pl_move; blockdownmove();}
         if(dpl_top>0) dpl_top-=pl_move;
     }
@@ -403,42 +351,42 @@ window.onload=function(){
         if(key["ShiftLeft"]) pl_move*=2;
         player_block_check();
         if(dpl_top<88&&dpl_top>88-pl_move) pl_move=88-dpl_top;
-        for(let i=0;i<blonum;i++){
+        for(let i=0;i<all_block_data.length;i++){
             if(pl_left<blo_right[i]&&pl_right>blo_left[i]&&pl_top<blo_bottom[i]&&pl_bottom>blo_top[i]-pl_move){
                 pl_move=blo_top[i]-pl_bottom;
             }
         }
-        pl_y+=pl_move;
+        player.top+=pl_move;
         if(dpl_top>=88) {map_top-=pl_move; blockupmove();}
         if(dpl_top<88) dpl_top+=pl_move;
     }
 
 
     function blockleftmove(){
-        for(let i=0;i<blonum;i++){
-            dis_block[i].left-=pl_move;
+        for(let i=0;i<dis_block_data.length;i++){
+            dis_block_data[i].left-=pl_move;
         }
     }
     function blockrightmove(){
-        for(let i=0;i<blonum;i++){
-            dis_block[i].left+=pl_move;
+        for(let i=0;i<dis_block_data.length;i++){
+            dis_block_data[i].left+=pl_move;
         }
     }
     function blockupmove(){
-        for(let i=0;i<blonum;i++){
-            dis_block[i].top-=pl_move;
+        for(let i=0;i<dis_block_data.length;i++){
+            dis_block_data[i].top-=pl_move;
         }
     }
     function blockdownmove(){
-        for(let i=0;i<blonum;i++){
-            dis_block[i].top+=pl_move;
+        for(let i=0;i<dis_block_data.length;i++){
+            dis_block_data[i].top+=pl_move;
         }
     }
 
     function left_collision(){
         let col=false;
         player_block_check();
-        for(let i=0;i<blonum;i++){
+        for(let i=0;i<all_block_data.length;i++){
             if(pl_left<=blo_right[i]&&pl_right>blo_left[i]&&pl_top<blo_bottom[i]&&pl_bottom>blo_top[i])
             {
                 col=true; // 한 블록이라도 플레이어와 충돌 범위 근처에 있으면 true
@@ -449,7 +397,7 @@ window.onload=function(){
     function right_collision(){
         let col=false;
         player_block_check();
-        for(let i=0;i<blonum;i++){
+        for(let i=0;i<all_block_data.length;i++){
             if(pl_left<blo_right[i]&&pl_right>=blo_left[i]&&pl_top<blo_bottom[i]&&pl_bottom>blo_top[i])
             {
                 col=true;
@@ -460,7 +408,7 @@ window.onload=function(){
     function up_collision(){
         let col=false;
         player_block_check();
-        for(let i=0;i<blonum;i++){
+        for(let i=0;i<all_block_data.length;i++){
             if(pl_left<blo_right[i]&&pl_right>blo_left[i]&&pl_top<=blo_bottom[i]&&pl_bottom>blo_top[i])
             {
                 col=true;
@@ -471,7 +419,7 @@ window.onload=function(){
     function down_collision(){
         let col=false;
         player_block_check();
-        for(let i=0;i<blonum;i++){
+        for(let i=0;i<all_block_data.length;i++){
             if(pl_left<blo_right[i]&&pl_right>blo_left[i]&&pl_top<blo_bottom[i]&&pl_bottom>=blo_top[i])
             {
                 col=true;

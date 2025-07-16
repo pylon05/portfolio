@@ -81,13 +81,13 @@ div{
     float: left;
     position:absolute;
     opacity: 0.3;
-    width:1600%;
-    height:1200%;
+    width:600%;
+    height:450%;
 }
 #map>div{
     float:left;
-    width:12.5%; /* 800% / 4 = 200% */
-    height:12.5%; /* 600% / 4 = 150% */
+    width:calc(100% / 3); /* 600% / 3 = 200% */
+    height:calc(100% / 3); /* 450% / 3 = 150% */
 }
 
 #map>div>div{
