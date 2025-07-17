@@ -38,13 +38,27 @@ div{
     content:"▶ ";
     color:black;
 }
-#menu_list>#key_change_active{
+#key_set_list{
     position:absolute;
     border:1px solid black;
-    height:200px;
-    width:160px;
-    left:-1px;
-    top:23px;
+    background-color:#fff;
+    /* width:130px; */
+    left:20px;
+    bottom:20px;
+    z-index:1;
+}
+#key_set_list>div>span{
+    margin-left:30px;
+}
+#key_set_list>div>span.active::before{
+    position:absolute;
+    left:0;
+    content:"▶ ";
+    color:black;
+}
+#key_set_list>#comment>span{
+    margin-left:0;
+    height:3em;
 }
 
 #display{

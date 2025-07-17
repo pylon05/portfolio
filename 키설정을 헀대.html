@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>키 설정 화면</title>
+  <style>
+    body { font-family: sans-serif; background: #1e1e2f; color: white; text-align: center; }
+    .container { margin-top: 50px; }
+    .key-setting {
+      background: #2e2e3f;
+      border: 1px solid #444;
+      border-radius: 10px;
+      padding: 20px;
+      display: inline-block;
+      margin-bottom: 20px;
+    }
+    .action-label {
+      font-size: 1.2em;
+      margin-bottom: 10px;
+    }
+    .current-key {
+      font-weight: bold;
+      color: #00ffff;
+      margin-bottom: 10px;
+    }
+    .change-button {
+      padding: 10px 20px;
+      background: #00aaff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .change-button:hover {
+      background: #0090dd;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎮 게임 키 설정</h1>
+  <div class="container">
+
+    <div class="key-setting" id="moveLeft">
+      <div class="action-label">이동 왼쪽</div>
+      <div class="current-key" id="moveLeftKey">KeyA</div>
+      <button class="change-button" onclick="startListening('moveLeft')">변경</button>
+    </div>
+
+    <div class="key-setting" id="jump">
+      <div class="action-label">점프</div>
+      <div class="current-key" id="jumpKey">ArrowUp</div>
+      <button class="change-button" onclick="startListening('jump')">변경</button>
+    </div>
+
+  </div>
+
+  <script>
+    const keyBindings = {
+      moveLeft: "KeyA",
+      jump: "ArrowUp"
+    };
+    let awaitingKeyFor = null;
+
+    function startListening(action) {
+      awaitingKeyFor = action;
+      alert("새 키를 눌러주세요!");
+    }
+
+    document.addEventListener("keydown", (e) => {
+      if (awaitingKeyFor) {
+        keyBindings[awaitingKeyFor] = e.code;
+        document.getElementById(awaitingKeyFor + "Key").textContent = e.code;
+        awaitingKeyFor = null;
+      }
+    });
+  </script>
+</body>
+</html>
