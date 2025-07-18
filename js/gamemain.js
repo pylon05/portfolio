@@ -5,7 +5,6 @@
     다음 검토까지 쓰여지는 이미지 3개정도 가져오기
 
     맵 구성
-        맵,구조물(장애물) 이미지는 일단 인터넷에서 가져오고
         맵을 여러 덩이로 분리해서 만들듯 map tile
         그렇다면 맵을 이동할 때 맵 로드는 어떤 식으로 할지 - 일단 전체 맵의 2차원 좌표를 만들기 allmap
         현재 떠 있는 맵의 좌표값을 만들고 2차원 배열에 보관 currentmap
@@ -22,11 +21,8 @@ window.onload=function(){
     
     /******* 플레이어, 맵, 블록 변수 생성 ********/
 
-    const player={map_x: 6, map_y: 3, left: 174, top: 134, width: 12, height: 12}; //플레이어 시작점 데이터
-    const all_block_data=block_data.map(obj=>({...obj})); //block_data의 값에 영향을 주지 않는 복사본 생성
-    let mapx=player.map_x-1;
-    let mapy=player.map_y-1;
-    
+    const player={map_x: 3, map_y: 4, left: 4, top: 54, width: 12, height: 12}; //플레이어 시작점 데이터
+    const all_block_data=block_data.map(obj=>({...obj}));  
     let pl_left;
     let pl_right;
     let pl_top;
@@ -52,48 +48,68 @@ window.onload=function(){
     const dis_blo_left=[];
     const dis_blo_top=[];
 
-    /* 플레이어가 있는 맵 좌표가 맵의 경계선을 넘어 갔을 때만 실행 */
-    let blonum; //블록의 개수 체크는 사용하는 다른 곳이 있기 때문에 전역 변수로 지정
-    let dis_block_data=block_data.filter(obj => obj.map_x >= mapx && obj.map_x <= mapx+2 && obj.map_y >= mapy && obj.map_y <= mapy+2); // 화면에서 보여줄 블록 데이터 필터링
-    let map_left=dpl_left-player.left-200; //맨 처음 맵의 left값은 보이는 x좌표-실제 x좌표 만큼 왼쪽으로 밀음
-    let map_top=dpl_top-player.top-150;
-    for(let i=0;i<dis_block_data.length;i++){ //맨 처음 보이는 블록 값도 map과 같은 값으로 왼쪽으로 밀음
-        dis_block_data[i].left+=map_left; 
-        dis_block_data[i].top+=map_top;
+    /* 플레이어가 있는 맵 좌표가 맵의 경계선을 넘어 갔을 때 재실행 */
+    let block_num; //블록의 개수 체크는 사용하는 다른 곳이 있기 때문에 전역 변수로 지정
+    let map_left;
+    let map_top;
+    let mapx;
+    let mapy;
+    let copy_block_data;
+    let dis_block_data;
+    function display_data_setting(){
+        mapx=player.map_x-1;
+        mapy=player.map_y-1;
+        copy_block_data=block_data.map(obj=>({...obj})); //block_data의 값에 영향을 주지 않게 복사본 생성
+        dis_block_data=copy_block_data.filter(obj => obj.map_x >= mapx && obj.map_x <= mapx+2 && obj.map_y >= mapy && obj.map_y <= mapy+2); // 화면에서 보여줄 블록 데이터 필터링
+        
+        block_num=dis_block_data.length;
+        map_left=dpl_left-player.left-200; //맨 처음 맵의 left값은 보이는 x좌표-실제 x좌표 만큼 왼쪽으로 밀음
+        map_top=dpl_top-player.top-150;
+        for(let i=0;i<block_num;i++){ //맨 처음 보이는 블록 값도 map과 같은 값으로 왼쪽으로 밀음
+            dis_block_data[i].left+=map_left;
+            dis_block_data[i].top+=map_top;
+        }
+        map_div_setting(); //맵에 'div id='+map의 x좌표+map의 y좌표를 줌
+        block_div_setting(); //블록에 'div id='+번호 를 줌
+        
     }
+    
+    display_data_setting();
 
     /******* 맵,블록 아이디 불러오기 후 div 생성 ********/
 
-    let map=document.getElementById("map"); //맵 id 불러오고 div 생성
-    let curmap="";
-    let map_num;
-    for(let i=mapx;i<=mapx+2;i++){
-        curmap+="<div>";
-        for(let j=mapy;j<=mapy+2;j++){
-            curmap+="<div id='"+i+" "+j+"' style='background-color:";
-            map_num=i*8+j;
-            if(map_num%6==0) curmap+="#2dc;'>";
-            if(map_num%6==1) curmap+="#5ab;'>";
-            if(map_num%6==2) curmap+="#88a;'>";
-            if(map_num%6==3) curmap+="#a50;'>";
-            if(map_num%6==4) curmap+="#c29;'>";
-            if(map_num%6==5) curmap+="#f08;'>";
+    
+    function map_div_setting(){
+        let map=document.getElementById("map"); //맵 id 불러오고 div 생성
+        let curmap="";
+        let map_num;
+        for(let i=mapx;i<=mapx+2;i++){
+            curmap+="<div>";
+            for(let j=mapy;j<=mapy+2;j++){
+                curmap+="<div id='"+i+" "+j+"' style='background-color:";
+                map_num=i*8+j;
+                if(map_num%6==0) curmap+="#2dc;'>";
+                if(map_num%6==1) curmap+="#5ab;'>";
+                if(map_num%6==2) curmap+="#88a;'>";
+                if(map_num%6==3) curmap+="#a50;'>";
+                if(map_num%6==4) curmap+="#c29;'>";
+                if(map_num%6==5) curmap+="#f08;'>";
+                curmap+="</div>";
+            }
             curmap+="</div>";
         }
-        curmap+="</div>";
+        map.innerHTML=curmap;
     }
-    map.innerHTML=curmap;
+    
 
-    function block_div(){
-        let blo=document.getElementById("block"); // 블록 id 불러오고 div 생성
+    function block_div_setting(){
+        let blo=document.getElementById("block");
         let curblo="";
-        for(let i=0;i<dis_block_data.length;i++){ // 화면에서 보여줄 블록 데이터 아이디 설정
+        for(let i=0;i<block_num;i++){ // 화면에서 보여줄 블록 데이터 아이디 설정
             curblo+="<div id='("+dis_block_data[i].map_x+", "+dis_block_data[i].map_y+") blo"+i+"'></div>";
         }
         blo.innerHTML=curblo;
     }
-
-    block_div();
 
     let p=document.getElementById("player"); // 플레이어 아이디 불러오기
 
@@ -103,15 +119,15 @@ window.onload=function(){
     
     //무슨 키가 메뉴키인지 확인하기 위해 e.key 형태로 출력
     let menukey="q";
-    let okkey="z";
-    let backkey="x";
+    let Akey="z";
+    let Bkey="x";
     let leftkey="ArrowLeft";
     let upkey="ArrowUp";
     let rightkey="ArrowRight";
     let downkey="ArrowDown";
     
-    const key_set_list_text="<div id='left_key'><span>left</span><span>"+leftkey+"</span></div><div id='up_key'><span>up</span></div><div id='right_key'><span>right</span></div><div id='down_key'><span>down</span></div>"
-                          +"<div id='ok_key'><span>A</span></div><div id='back_key'><span>B</span></div><div id='menu_key'><span>메뉴</span></div><div id='comment'><span>변경하고 싶은 키 커서에서 A키를 누르세요.</span></div>";
+
+    
 
     menu_deactive(); // 실행 초기에는 아무것도 열려있지 않은 상태
 
@@ -140,48 +156,56 @@ window.onload=function(){
         }
     }
     function menu_deactive() {
-        menu.innerHTML="<span>메뉴 열기</span><br><span>"+menukey+" 키</span>";
+        menu.innerHTML="메뉴 "+menukey+" 키";
     }
 
     let key_set_point=1;
+    
     function key_set_list() {
+        const key_set_list_text="<div id='left_key'><span>left</span><span>"+leftkey+"</span></div>"
+                           +"<div id='up_key'><span>up</span><span>"+upkey+"</span></div>"
+                           +"<div id='right_key'><span>right</span><span>"+rightkey+"</span></div>"
+                           +"<div id='down_key'><span>down</span><span>"+downkey+"</span></div>"
+                           +"<div id='A_key'><span>A</span><span>"+Akey+"</span></div>"
+                           +"<div id='B_key'><span>B</span><span>"+Bkey+"</span></div>"
+                           +"<div id='menu_key'><span>메뉴</span><span>"+menukey+"</span></div>"
+                           +"<div id='comment'>변경하고 싶은 키 커서에서 A키를 누르세요.</div>";
         menu.innerHTML=key_set_list_text;
-        if(leftkey=="ArrowLeft") leftkey="←";
         switch(key_set_point){
             case 1:
                 document.getElementById("left_key").innerHTML="<span class='active'>left</span><span>"+leftkey+"</span>";
-                document.getElementById("up_key").innerHTML="<span>up</span>";
-                document.getElementById("menu_key").innerHTML="<span>메뉴</span>";
+                document.getElementById("up_key").innerHTML="<span>up</span><span>"+upkey+"</span>";
+                document.getElementById("menu_key").innerHTML="<span>메뉴</span><span>"+menukey+"</span>";
                 break;
             case 2:
-                document.getElementById("left_key").innerHTML="<span>left</span>";
-                document.getElementById("up_key").innerHTML="<span class='active'>up</span>";
-                document.getElementById("right_key").innerHTML="<span>right</span>";
+                document.getElementById("left_key").innerHTML="<span>left</span><span>"+leftkey+"</span>";
+                document.getElementById("up_key").innerHTML="<span class='active'>up</span><span>"+upkey+"</span>";
+                document.getElementById("right_key").innerHTML="<span>right</span><span>"+rightkey+"</span>";
                 break;
             case 3:
-                document.getElementById("up_key").innerHTML="<span>up</span>";
-                document.getElementById("right_key").innerHTML="<span class='active'>right</span>";
-                document.getElementById("down_key").innerHTML="<span>down</span>";
+                document.getElementById("up_key").innerHTML="<span>up</span><span>"+upkey+"</span>";
+                document.getElementById("right_key").innerHTML="<span class='active'>right</span><span>"+rightkey+"</span>";
+                document.getElementById("down_key").innerHTML="<span>down</span><span>"+downkey+"</span>";
                 break;
             case 4:
-                document.getElementById("right_key").innerHTML="<span>right</span>";
-                document.getElementById("down_key").innerHTML="<span class='active'>down</span>";
-                document.getElementById("ok_key").innerHTML="<span>A</span>";
+                document.getElementById("right_key").innerHTML="<span>right</span><span>"+rightkey+"</span>";
+                document.getElementById("down_key").innerHTML="<span class='active'>down</span><span>"+downkey+"</span>";
+                document.getElementById("A_key").innerHTML="<span>A</span><span>"+Akey+"</span>";
                 break;
             case 5:
-                document.getElementById("down_key").innerHTML="<span>down</span>";
-                document.getElementById("ok_key").innerHTML="<span class='active'>A</span>";
-                document.getElementById("back_key").innerHTML="<span>B</span>";
+                document.getElementById("down_key").innerHTML="<span>down</span><span>"+downkey+"</span>";
+                document.getElementById("A_key").innerHTML="<span class='active'>A</span><span>"+Akey+"</span>";
+                document.getElementById("B_key").innerHTML="<span>B</span><span>"+Bkey+"</span>";
                 break;
             case 6:
-                document.getElementById("ok_key").innerHTML="<span>A</span>";
-                document.getElementById("back_key").innerHTML="<span class='active'>B</span>";
-                document.getElementById("menu_key").innerHTML="<span>메뉴</span>";
+                document.getElementById("A_key").innerHTML="<span>A</span><span>"+Akey+"</span>";
+                document.getElementById("B_key").innerHTML="<span class='active'>B</span><span>"+Bkey+"</span>";
+                document.getElementById("menu_key").innerHTML="<span>메뉴</span><span>"+menukey+"</span>";
                 break;
             case 7:
-                document.getElementById("left_key").innerHTML="<span>left</span>";
-                document.getElementById("back_key").innerHTML="<span>B</span>";
-                document.getElementById("menu_key").innerHTML="<span class='active'>메뉴</span>";
+                document.getElementById("left_key").innerHTML="<span>left</span><span>"+leftkey+"</span>";
+                document.getElementById("B_key").innerHTML="<span>B</span><span>"+Bkey+"</span>";
+                document.getElementById("menu_key").innerHTML="<span class='active'>메뉴</span><span>"+menukey+"</span>";
                 break;
             default: //그 외 이상한 값이 들어갔을 때
                 console.log("keySet_point 값이 이상함 : "+key_set_point);
@@ -225,7 +249,11 @@ window.onload=function(){
     //키를 꾹 누를 때 한번 눌려지고 딜레이가 생기는 키를 딜레이 없이 작동하게 하는 이벤트와
     //한번만 작동되게 하고 키를 떼야 다시 작동하게 하는 이벤트가 아래에 해당
     window.addEventListener("keydown", function(e) {
-        if ([leftkey, "ArrowRight", "ArrowUp", "ArrowDown","ShiftLeft", menukey, okkey, backkey].includes(e.key)) {
+        if ([leftkey, upkey, rightkey, downkey, "ShiftLeft", menukey, Akey, Bkey].includes(e.code)) {
+            key[e.code] = true;
+            e.preventDefault();
+        }
+        if ([leftkey, upkey, rightkey, downkey, "ShiftLeft", menukey, Akey, Bkey].includes(e.key)) {
             key[e.key] = true;
             e.preventDefault();
         }
@@ -243,37 +271,143 @@ window.onload=function(){
                 menu.id="menu";
                 menu_deactive();
             }
-            if(key[backkey]&&!keyPressed[menukey]) { // 취소 키를 눌러서 메뉴창 닫기
-                keyPressed[backkey] = true; // 취소 키를 한번 떼야 다시 실행되게 설정
+            if(key[Bkey]&&!keyPressed[Bkey]) { // 취소 키를 눌러서 메뉴창 닫기
+                keyPressed[Bkey] = true; // 취소 키를 한번 떼야 다시 실행되게 설정
                 menu.id="menu";
                 menu_deactive();
             }
 
-            if(key[okkey]&&!keyPressed[okkey]&&menu_point==1){ //키 설정 메뉴 앞에서 OK키를 눌렀을 경우
-                keyPressed[okkey] = true; // OK 키를 한번 떼야 다시 실행되게 설정
+            if(key[Akey]&&!keyPressed[Akey]&&menu_point==1){ //키 설정 메뉴 앞에서 OK키를 눌렀을 경우
+                keyPressed[Akey] = true; // OK 키를 한번 떼야 다시 실행되게 설정
                 menu.id="key_set_list";
                 key_set_list(); //키설정 창 열기
             }
         }
 
         if(menu.id=="key_set_list"){
-            if(key[backkey]){
-                keyPressed[backkey] = true;
+            if(key[Bkey]){
+                keyPressed[Bkey] = true;
                 menu.id="menu_list";
                 menu_list();
             }
-                
+            if(key[Akey]&&!keyPressed[Akey]){
+                keyPressed[Akey] = true;
+                switch(key_set_point){
+                    case 1:
+                        document.getElementById("comment").innerHTML="바꿀 left키를 입력하세요";
+                        menu.id="key_changing";
+                        break;
+                    case 2:
+                        document.getElementById("comment").innerHTML="바꿀 up키를 입력하세요";
+                        menu.id="key_changing";
+                        break;
+                    case 3:
+                        document.getElementById("comment").innerHTML="바꿀 right키를 입력하세요";
+                        menu.id="key_changing";
+                        break;
+                    case 4:
+                        document.getElementById("comment").innerHTML="바꿀 down키를 입력하세요";
+                        menu.id="key_changing";
+                        break;
+                    case 5:
+                        document.getElementById("comment").innerHTML="바꿀 A키를 입력하세요";
+                        menu.id="key_changing";
+                        break;
+                    case 6:
+                        document.getElementById("comment").innerHTML="바꿀 B키를 입력하세요";
+                        menu.id="key_changing";
+                        break;
+                    case 7:
+                        document.getElementById("comment").innerHTML="바꿀 menu키를 입력하세요";
+                        menu.id="key_changing";
+                        break;
+                    default:
+                        console.log("key_set_point 에 예상치 못한 값 발생 : "+key_set_point);
+                        break;
+                }
+            }
         }
+
+        if(menu.id=="key_changing"){
+            // if(e.code){
+            //     switch(key_set_point){
+            //     case 1:
+            //         leftkey=e.code;
+            //         console.log(e.code);
+            //         menu.id="key_set_list";
+            //         key_set_list();
+            //         break;
+            //     default:
+            //         console.log("key_set_point 에 예상치 못한 값 발생 : "+key_set_point);
+            //         break;
+            //     }
+            // }
+            if(!keyPressed[Akey]){
+                switch(key_set_point){
+                    case 1:
+                        keyPressed[e.code]=true;
+                        leftkey=e.code;
+                        menu.id="key_set_list";
+                        key_set_list();
+                        break;
+                    case 2:
+                        keyPressed[e.code]=true;
+                        upkey=e.code;
+                        menu.id="key_set_list";
+                        key_set_list();
+                        break;
+                    case 3:
+                        keyPressed[e.code]=true;
+                        rightkey=e.code;
+                        menu.id="key_set_list";
+                        key_set_list();
+                        break;
+                    case 4:
+                        keyPressed[e.code]=true;
+                        downkey=e.code;
+                        menu.id="key_set_list";
+                        key_set_list();
+                        break;
+                    case 5:
+                        keyPressed[e.code]=true;
+                        Akey=e.code;
+                        menu.id="key_set_list";
+                        key_set_list();
+                        break;
+                    case 6:
+                        keyPressed[e.code]=true;
+                        Bkey=e.code;
+                        menu.id="key_set_list";
+                        key_set_list();
+                        break;
+                    case 7:
+                        keyPressed[e.code]=true;
+                        menukey=e.code;
+                        menu.id="key_set_list";
+                        key_set_list();
+                        break;
+                    default:
+                        console.log("key_set_point 에 예상치 못한 값 발생 : "+key_set_point);
+                        break;
+                }
+            }
+            
+        }
+
+
     });
 
     window.addEventListener("keyup", function(e) {
-        if ([leftkey, "ArrowRight", "ArrowUp", "ArrowDown", "ShiftLeft", menukey, okkey, backkey].includes(e.key)) {
+        if ([leftkey, upkey, rightkey, downkey, "ShiftLeft", menukey, Akey, Bkey].includes(e.code)) {
+            key[e.code] = false;
+            e.preventDefault();
+        }
+        if ([leftkey, upkey, rightkey, downkey, "ShiftLeft", menukey, Akey, Bkey].includes(e.key)) {
             key[e.key] = false;
             e.preventDefault();
         }
-        keyPressed[menukey] = false; // 키를 떼면 KeyPressed에서 제거
-        keyPressed[okkey] = false;
-        keyPressed[backkey] = false;
+        keyPressed[e.code] = false; // 키를 떼면 KeyPressed에서 제거
+        keyPressed[e.key] = false; // 키를 떼면 KeyPressed에서 제거
         
     });
 
@@ -296,14 +430,14 @@ window.onload=function(){
 
 
 
-
+    
 
     gameLoop();
 
     function gameLoop() {
         display(); // 프레임마다 map, player, block 갱신
         if(menu.id=="menu") move();
-        console.log(map_left+" "+map_top+" "+pl_x+" "+pl_y+" "+dpl_left+" "+dpl_top+" "+LR_key+" "+UD_key+" "+pl_move+" "+leftkey);
+        console.log(map_left+" "+map_top+" "+pl_x+" "+pl_y+" "+dpl_left+" "+dpl_top+" "+pl_move);
         requestAnimationFrame(gameLoop);
     }
 
@@ -343,11 +477,11 @@ window.onload=function(){
         
     }
     function display(){
-        map.setAttribute("style","left:"+map_left+"%; top:"+map_top+"%;");
-        for(let i=0;i<dis_block_data.length;i++){ // 보여줄 블록들의 id를 불러오고 style 설정
+        document.getElementById("map").setAttribute("style","left:"+map_left+"%; top:"+map_top+"%;");
+        for(let i=0;i<block_num;i++){ // 보여줄 블록들의 id를 불러오고 style 설정
             let b=document.getElementById("("+dis_block_data[i].map_x+", "+dis_block_data[i].map_y+") blo"+i);
-            dis_blo_left[i]=dis_block_data[i].left+(dis_block_data[i].map_x-5)*200; //블록 좌표값을 화면에 보여줄 좌표값으로 설정
-            dis_blo_top[i]=dis_block_data[i].top+(dis_block_data[i].map_y-2)*150;
+            dis_blo_left[i]=dis_block_data[i].left+dis_block_data[i].map_x*200-mapx*200; //블록 좌표값을 화면에 보여줄 좌표값으로 설정
+            dis_blo_top[i]=dis_block_data[i].top+dis_block_data[i].map_y*150-mapy*150;
             b.setAttribute("style","left:"+dis_blo_left[i]+"%; top:"+dis_blo_top[i]+"%; width:"+dis_block_data[i].width+"%; height:"+dis_block_data[i].height+"%;");
         }
         p.setAttribute("style","left:"+dpl_left+"%; top:"+dpl_top+"%; width:"+player.width+"%; height:"+player.height+"%;");
@@ -385,6 +519,7 @@ window.onload=function(){
         if(player.left<0) {
             player.left+=200;
             player.map_x-=1;
+            display_data_setting();
         }
     }
     function player_rightmove(){
@@ -403,6 +538,7 @@ window.onload=function(){
         if(player.left>200) {
             player.left-=200;
             player.map_x+=1;
+            display_data_setting();
         }
     }
     function player_upmove(){
@@ -421,6 +557,7 @@ window.onload=function(){
         if(player.top<0){
             player.top+=150;
             player.map_y-=1;
+            display_data_setting();
         }
     }
     function player_downmove(){
@@ -439,27 +576,28 @@ window.onload=function(){
         if(player.top>150){
             player.top-=150;
             player.map_y+=1;
+            display_data_setting();
         }
     }
 
 
     function blockleftmove(){
-        for(let i=0;i<dis_block_data.length;i++){
+        for(let i=0;i<block_num;i++){
             dis_block_data[i].left-=pl_move;
         }
     }
     function blockrightmove(){
-        for(let i=0;i<dis_block_data.length;i++){
+        for(let i=0;i<block_num;i++){
             dis_block_data[i].left+=pl_move;
         }
     }
     function blockupmove(){
-        for(let i=0;i<dis_block_data.length;i++){
+        for(let i=0;i<block_num;i++){
             dis_block_data[i].top-=pl_move;
         }
     }
     function blockdownmove(){
-        for(let i=0;i<dis_block_data.length;i++){
+        for(let i=0;i<block_num;i++){
             dis_block_data[i].top+=pl_move;
         }
     }
@@ -510,3 +648,8 @@ window.onload=function(){
     }
 
 };
+
+/* 그 외 알아두면 좋을 것들
+객체 2개끼리 합치기
+let obj={...dis_block_data, ...o2};
+*/
