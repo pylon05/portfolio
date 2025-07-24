@@ -12,7 +12,7 @@
       border-radius: 10px;
       padding: 20px;
       display: inline-block;
-      margin-bottom: 20px;
+      margin: 10px;
     }
     .action-label {
       font-size: 1.2em;
@@ -38,41 +38,95 @@
 </head>
 <body>
   <h1>🎮 게임 키 설정</h1>
-  <div class="container">
-
-    <div class="key-setting" id="moveLeft">
-      <div class="action-label">이동 왼쪽</div>
-      <div class="current-key" id="moveLeftKey">KeyA</div>
-      <button class="change-button" onclick="startListening('moveLeft')">변경</button>
-    </div>
-
-    <div class="key-setting" id="jump">
-      <div class="action-label">점프</div>
-      <div class="current-key" id="jumpKey">ArrowUp</div>
-      <button class="change-button" onclick="startListening('jump')">변경</button>
-    </div>
-
-  </div>
+  <div class="container" id="keySettingsContainer"></div>
+  <div id="statusMessage" style="margin-top:30px; font-size:1.1em; color:#00ffaa;"></div>
 
   <script>
-    const keyBindings = {
-      moveLeft: "KeyA",
-      jump: "ArrowUp"
-    };
+    const actions = [
+      { id: "menu", label: "메뉴", defaultKey: "KeyQ" },
+      { id: "A", label: "버튼 A", defaultKey: "KeyZ" },
+      { id: "B", label: "버튼 B", defaultKey: "KeyX" },
+      { id: "left", label: "왼쪽 이동", defaultKey: "ArrowLeft" },
+      { id: "up", label: "위쪽 이동", defaultKey: "ArrowUp" },
+      { id: "right", label: "오른쪽 이동", defaultKey: "ArrowRight" },
+      { id: "down", label: "아래쪽 이동", defaultKey: "ArrowDown" },
+      { id: "jump", label: "점프", defaultKey: "Space" },
+      { id: "dash", label: "대시", defaultKey: "ShiftLeft" },
+      { id: "interact", label: "상호작용", defaultKey: "KeyE" }
+    ];
+
+    const keyBindings = {};
     let awaitingKeyFor = null;
+
+    const container = document.getElementById("keySettingsContainer");
+    
+    function beautifyKey(code) {
+      const keyMap = {
+        "ArrowUp": "↑",
+        "ArrowDown": "↓",
+        "ArrowLeft": "←",
+        "ArrowRight": "→",
+        "Space": "Space",
+        "Enter": "Enter",
+        "ShiftLeft": "Shift",
+        "Escape": "Esc"
+        // KeyA~KeyZ는 자동 처리 가능
+      };
+      if (code.startsWith("Key")) return code.slice(3);
+      return keyMap[code] || code;
+    }
+
+    for (let action of actions) {
+      keyBindings[action.id] = action.defaultKey;
+
+      const div = document.createElement("div");
+      div.className = "key-setting";
+      div.id = action.id;
+
+      div.innerHTML = `
+        <div class="action-label">${action.label}</div>
+        <div class="current-key" id="${action.id}Key">${beautifyKey(action.defaultKey)}</div>
+        <button class="change-button" onclick="startListening('${action.id}')">변경</button>
+      `;
+
+      container.appendChild(div);
+    }
 
     function startListening(action) {
       awaitingKeyFor = action;
-      alert("새 키를 눌러주세요!");
+      showMessage(`🔧 '${action}' 키를 변경하려면 새 키를 눌러주세요.`);
+    }
+    function showMessage(text) {
+      document.getElementById("statusMessage").innerHTML = text;
     }
 
     document.addEventListener("keydown", (e) => {
-      if (awaitingKeyFor) {
-        keyBindings[awaitingKeyFor] = e.code;
-        document.getElementById(awaitingKeyFor + "Key").textContent = e.code;
-        awaitingKeyFor = null;
+    if (awaitingKeyFor) {
+      e.preventDefault(); // 🛑 기본 동작(스크롤 등) 방지
+
+      const newKey = e.code;
+      const previousKey = keyBindings[awaitingKeyFor];
+      let message = "";
+
+      // 중복 키 찾기
+      const alreadyAssigned = Object.entries(keyBindings).find(
+        ([action, code]) => code === newKey && action !== awaitingKeyFor
+      );
+      
+      if (alreadyAssigned) {
+        keyBindings[alreadyAssigned[0]] = previousKey;
+        document.getElementById(alreadyAssigned[0] + "Key").textContent = beautifyKey(previousKey);
+        message += `⚠️ '${beautifyKey(newKey)}' 키는 '${alreadyAssigned[0]}'에 이미 사용 중이어서 '${beautifyKey(previousKey)}'로 자동 재할당했어요.<br>`;
       }
-    });
+
+      keyBindings[awaitingKeyFor] = newKey;
+      document.getElementById(awaitingKeyFor + "Key").textContent = beautifyKey(newKey);
+      message += `✅ '${awaitingKeyFor}' 키가 '${beautifyKey(newKey)}' 로 변경되었습니다.`;
+
+      showMessage(message);
+      awaitingKeyFor = null;
+    }
+  });
   </script>
 </body>
 </html>

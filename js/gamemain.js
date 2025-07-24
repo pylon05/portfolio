@@ -117,19 +117,25 @@ window.onload=function(){
     let menu=document.getElementById("menu");
     const menu_list_text="<div id='key_change'></div><div id='save'></div><div id='exit'></div>";
     
-    //무슨 키가 메뉴키인지 확인하기 위해 e.key 형태로 출력
-    let menukey="q";
-    let Akey="z";
-    let Bkey="x";
+    //각 키 데이터는 e.code 형태로 저장하고 무슨 키가 배정되어있는지는 e.key가 보기 쉬우므로 따로 변수로 바꿔서 저장
+    //shiftLeft키+e.key 형태로 영문 키가 같이 눌리면 대문자로 판정되어 다른 키로 인식되어서 움직이지 않음
+    let menukey="KeyQ";
+    let Akey="KeyZ";
+    let Bkey="KeyX";
     let leftkey="ArrowLeft";
     let upkey="ArrowUp";
     let rightkey="ArrowRight";
     let downkey="ArrowDown";
-    
 
-    
+    let show_menukey="q";
+    let show_Akey="z";
+    let show_Bkey="x";
+    let show_leftkey="ArrowLeft";
+    let show_upkey="ArrowUp";
+    let show_rightkey="ArrowRight";
+    let show_downkey="ArrowDown";
 
-    menu_deactive(); // 실행 초기에는 아무것도 열려있지 않은 상태
+    menu_deactive();
 
     let menu_point=1; // 메뉴 포인터 순서
     function menu_list() { //메뉴 창이 활성화됐을 때
@@ -140,12 +146,12 @@ window.onload=function(){
                 document.getElementById("save").innerHTML="<span>저장</span>";
                 document.getElementById("exit").innerHTML="<span>게임 종료</span>";
                 break;
-            case 2: //두번째 메뉴에 커서가 가게 함
+            case 2:
                 document.getElementById("save").innerHTML="<span class='active'>저장</span>";
                 document.getElementById("key_change").innerHTML="<span>키 변경</span>";
                 document.getElementById("exit").innerHTML="<span>게임 종료</span>";
                 break;
-            case 3: //세번째 메뉴에 커서가 가게 함
+            case 3: 
                 document.getElementById("exit").innerHTML="<span class='active'>게임 종료</span>";
                 document.getElementById("key_change").innerHTML="<span>키 변경</span>";
                 document.getElementById("save").innerHTML="<span>저장</span>";
@@ -156,7 +162,7 @@ window.onload=function(){
         }
     }
     function menu_deactive() {
-        menu.innerHTML="메뉴 "+menukey+" 키";
+        menu.innerHTML="메뉴 "+show_menukey+" 키";
     }
 
     let key_set_point=1;
@@ -212,49 +218,18 @@ window.onload=function(){
                 break;
         }
     }
-    //키를 누를 때 돌아가는 keydown 이벤트
-    window.addEventListener("keydown", function(e) {
-        if (menu.id=="menu_list" && e.key == "ArrowUp"){
-            menu_point--;
-            if(menu_point<1) menu_point=3;
-            menu_list();
-        }
-        if (menu.id=="menu_list" && e.key == "ArrowDown"){
-            menu_point++;
-            if(menu_point>3) menu_point=1;
-            menu_list();
-        }
+    
 
-        if(menu.id=="key_set_list"){
-            if(e.key=="ArrowUp"){
-                key_set_point--;
-                if(key_set_point<1) key_set_point=7;
-                key_set_list();
-            }
-            if(e.key=="ArrowDown"){
-                key_set_point++;
-                if(key_set_point>7) key_set_point=1;
-                key_set_list();
-            }
-        }
-    });
-
-    /**************** 키 입력 관련 ****************/
+    /**************** 전체 키 입력 관련 ****************/
     
     const key = {}; // 누르는 키를 저장하는 객체
     const keyPressed = {}; // 누르고 있는 키 상황을 저장하는 객체
     let LR_key;
     let UD_key;
-    //1프레임마다 돌아가는 keydown, keyup 이벤트
-    //키를 꾹 누를 때 한번 눌려지고 딜레이가 생기는 키를 딜레이 없이 작동하게 하는 이벤트와
-    //한번만 작동되게 하고 키를 떼야 다시 작동하게 하는 이벤트가 아래에 해당
+
     window.addEventListener("keydown", function(e) {
         if ([leftkey, upkey, rightkey, downkey, "ShiftLeft", menukey, Akey, Bkey].includes(e.code)) {
             key[e.code] = true;
-            e.preventDefault();
-        }
-        if ([leftkey, upkey, rightkey, downkey, "ShiftLeft", menukey, Akey, Bkey].includes(e.key)) {
-            key[e.key] = true;
             e.preventDefault();
         }
         if(menu.id=="menu") {
@@ -284,8 +259,29 @@ window.onload=function(){
             }
         }
 
+        if (menu.id=="menu_list" && key[upkey]){
+            menu_point--;
+            if(menu_point<1) menu_point=3;
+            menu_list();
+        }
+        if (menu.id=="menu_list" && key[downkey]){
+            menu_point++;
+            if(menu_point>3) menu_point=1;
+            menu_list();
+        }
+
         if(menu.id=="key_set_list"){
-            if(key[Bkey]){
+            if(key[upkey]){
+                key_set_point--;
+                if(key_set_point<1) key_set_point=7;
+                key_set_list();
+            }
+            if(key[downkey]){
+                key_set_point++;
+                if(key_set_point>7) key_set_point=1;
+                key_set_list();
+            }
+            if(key[Bkey]&&!keyPressed[Bkey]){
                 keyPressed[Bkey] = true;
                 menu.id="menu_list";
                 menu_list();
@@ -329,24 +325,12 @@ window.onload=function(){
         }
 
         if(menu.id=="key_changing"){
-            // if(e.code){
-            //     switch(key_set_point){
-            //     case 1:
-            //         leftkey=e.code;
-            //         console.log(e.code);
-            //         menu.id="key_set_list";
-            //         key_set_list();
-            //         break;
-            //     default:
-            //         console.log("key_set_point 에 예상치 못한 값 발생 : "+key_set_point);
-            //         break;
-            //     }
-            // }
             if(!keyPressed[Akey]){
                 switch(key_set_point){
                     case 1:
                         keyPressed[e.code]=true;
                         leftkey=e.code;
+                        show_leftkey=e.key;
                         menu.id="key_set_list";
                         key_set_list();
                         break;
@@ -402,12 +386,7 @@ window.onload=function(){
             key[e.code] = false;
             e.preventDefault();
         }
-        if ([leftkey, upkey, rightkey, downkey, "ShiftLeft", menukey, Akey, Bkey].includes(e.key)) {
-            key[e.key] = false;
-            e.preventDefault();
-        }
-        keyPressed[e.code] = false; // 키를 떼면 KeyPressed에서 제거
-        keyPressed[e.key] = false; // 키를 떼면 KeyPressed에서 제거
+        keyPressed[e.code] = false;
         
     });
 
@@ -437,7 +416,7 @@ window.onload=function(){
     function gameLoop() {
         display(); // 프레임마다 map, player, block 갱신
         if(menu.id=="menu") move();
-        console.log(map_left+" "+map_top+" "+pl_x+" "+pl_y+" "+dpl_left+" "+dpl_top+" "+pl_move);
+        // console.log(map_left+" "+map_top+" "+pl_x+" "+pl_y+" "+dpl_left+" "+dpl_top+" "+pl_move);
         requestAnimationFrame(gameLoop);
     }
 
